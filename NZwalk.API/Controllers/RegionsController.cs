@@ -25,13 +25,15 @@ namespace NZwalk.API.Controllers
             this.regionRepository = regionRepository;
             this.mapper = mapper;
         }
+
+        //GET : localhost:portnumber/api/
         [HttpGet]
-        public async Task<IActionResult> GetRegion() // we can use other name than getregion() like  getall()
+        public async Task<IActionResult> GetRegion([FromQuery]string? filterOn, [FromQuery] string? filterQuery , [FromQuery] string? sortBy , [FromQuery] bool isAsc) // we can use other name than getregion() like  getall()
         {
             //get data from the database to domain model 
            //var regions = await dbcontext.Regions.ToListAsync(); using direct dbcontext
 
-           var regions = await regionRepository.GetAllAsync(); // using the region repository , repository pattern 
+           var regions = await regionRepository.GetAllAsync(filterOn, filterQuery, sortBy , isAsc ); // using the region repository , repository pattern 
 
 
             //map domain to dtos manual mapping

@@ -33,12 +33,48 @@ namespace NZwalk.API.Repository
 
         }
 
-        public async Task<List<Walks>> GetAllWalksAsync()
+        public async Task<List<Walks>> GetAllWalksAsync(string? filterOn, string? filterQuery, string? sortBy, bool isAsc = true, int pageNumber = 1, int pageSize = 100)
         {
-            return await dbContext.Walks
-     .Include(nameof(Walks.Difficulty))
-     .Include(nameof(Walks.Region))
-     .ToListAsync();
+            //  previous code without filter  return await dbContext.Walks
+            //.Include(nameof(Walks.Difficulty))
+            //.Include(nameof(Walks.Region))
+            //.ToListAsync();
+
+            //filtering
+            var walks = dbContext.Walks.Include(nameof(Walks.Difficulty)).Include(nameof(Walks.Region)).AsQueryable();
+            if (!string.IsNullOrWhiteSpace(filterOn)&& !string.IsNullOrWhiteSpace(filterQuery))
+            {
+                if (filterOn.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    
+                    walks = walks.Where(x => x.Name.ToLower().Contains(filterQuery.ToLower()));
+
+                }
+                else if (filterOn.Equals("Discription",StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = walks.Where(x => x.Discription.ToLower().Contains(filterQuery.ToLower()));
+                }
+            }
+
+            //sorting
+            
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                if(sortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    walks = isAsc? walks.OrderBy(x => x.Name) : walks.OrderByDescending(x => x.Name);
+
+                }
+                else if(sortBy.Equals("LengthInKm", StringComparison.OrdinalIgnoreCase))
+                {
+
+                    walks = isAsc ? walks.OrderBy(x => x.LengthInKm) : walks.OrderByDescending(x => x.LengthInKm);
+                }
+            }
+            //pagination
+            var skipResults = (pageNumber - 1)*pageSize;
+
+            return await walks.Skip(skipResults).Take(pageSize).ToListAsync();
         }
 
         public async Task<Walks?> GetWalksByIdAsync(Guid id)

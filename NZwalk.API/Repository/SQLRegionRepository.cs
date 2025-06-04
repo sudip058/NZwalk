@@ -33,9 +33,30 @@ namespace NZwalk.API.Repository
             return region;
         }
 
-        public async Task<List<Region>> GetAllAsync()
+        public async Task<List<Region>> GetAllAsync(string? filterOn, string? filterQuery, string? sortBy, bool isAsc = true)
         {
-            return await dbContext.Regions.ToListAsync();
+            //return await dbContext.Regions.ToListAsync();
+
+            //filtering
+            var region = dbContext.Regions.AsQueryable();
+            if(!string.IsNullOrWhiteSpace(filterOn)&&!string.IsNullOrWhiteSpace(filterQuery))
+            {
+                if (filterOn.Contains("Name",StringComparison.OrdinalIgnoreCase))
+                {
+                    region = region.Where(x => x.Name.ToLower().Contains(filterQuery.ToLower()));
+                }
+                
+            }
+            //sorting
+            if(!string.IsNullOrWhiteSpace(sortBy))
+            {
+                if(sortBy.Contains("Name",StringComparison.OrdinalIgnoreCase))
+                {
+                    region = isAsc ? region.OrderBy(x => x.Name) : region.OrderByDescending(x=>x.Name);
+                }
+            }
+
+            return await region.ToListAsync();
         }
 
         public async Task<Region?> GetRegionByIdAsync(Guid id)

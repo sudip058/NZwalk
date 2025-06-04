@@ -36,9 +36,10 @@ namespace NZwalk.API.Controllers
             return Ok(mapper.Map<WalkDto>(WalkDomainModel));
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllWalks()
+        //GET : localhost:portnumber/api/Walk?filterOn=Name&&filterQuery=sth&&sortBy=Name&&isAsc=True
+        public async Task<IActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy , [FromQuery] bool isAsc , [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
-           var walksDomain =  await walkRepository.GetAllWalksAsync();
+           var walksDomain =  await walkRepository.GetAllWalksAsync(filterOn,filterQuery,sortBy,isAsc, pageNumber , pageSize);
             //map the model to walkdto
             var walkDtos = mapper.Map<List<WalkDto>>(walksDomain);
             return Ok(walkDtos);
